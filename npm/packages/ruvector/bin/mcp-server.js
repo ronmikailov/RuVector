@@ -306,37 +306,32 @@ class Intelligence {
       } catch {}
     }
 
-    // Fallback
-    const ext = file ? path.extname(file) : '';
-    const state = `edit:${ext || 'unknown'}`;
-    const actions = this.data.patterns[state] || {};
+    // Fallback (engine unavailable). The store is flat: patterns["<state>|<outcome>"] = {q_value}.
+    // The learner writes outcome-keyed entries (`successful-edit` / `success`), so read those
+    // directly rather than the old nested patterns[state] map (which never existed).
+    const ext = file ? path.extname(file).slice(1) : 'unknown';
+    const state = `edit_${ext}_in_project`;
 
     const defaults = {
-      '.rs': 'rust-developer',
-      '.ts': 'typescript-developer',
-      '.tsx': 'react-developer',
-      '.js': 'javascript-developer',
-      '.jsx': 'react-developer',
-      '.py': 'python-developer',
-      '.go': 'go-developer',
-      '.sql': 'database-specialist',
-      '.md': 'documentation-specialist'
+      rs: 'rust-developer',
+      ts: 'typescript-developer',
+      tsx: 'react-developer',
+      js: 'javascript-developer',
+      jsx: 'react-developer',
+      py: 'python-developer',
+      go: 'go-developer',
+      sql: 'database-specialist',
+      md: 'documentation-specialist'
     };
 
-    let bestAgent = defaults[ext] || 'coder';
-    let bestScore = 0.5;
-
-    for (const [agent, score] of Object.entries(actions)) {
-      if (score > bestScore) {
-        bestAgent = agent;
-        bestScore = score;
-      }
-    }
+    const bestAgent = defaults[ext] || 'coder';
+    const succ = this.data.patterns?.[`${state}|successful-edit`]?.q_value
+              ?? this.data.patterns?.[`${state}|success`]?.q_value ?? 0;
 
     return {
       agent: bestAgent,
-      confidence: Math.min(bestScore, 1.0),
-      reason: Object.keys(actions).length > 0 ? 'learned from patterns' : 'default mapping'
+      confidence: succ > 0 ? Math.min(succ, 1.0) : 0.5,
+      reason: succ > 0 ? 'learned from past success' : 'default mapping'
     };
   }
 

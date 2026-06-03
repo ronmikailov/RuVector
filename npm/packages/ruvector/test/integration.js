@@ -87,7 +87,7 @@ try {
   const fs = require('fs');
 
   const packageJson = require('../package.json');
-  assert(packageJson.name === 'ruvector', 'Package name should be ruvector');
+  assert(/(^|\/)ruvector$/.test(packageJson.name), 'Package name should be ruvector (or a scoped fork of it)');
   assert(packageJson.version, 'Version should be set');
   assert(packageJson.main === 'dist/index.js', 'Main entry should be dist/index.js');
   assert(packageJson.types === 'dist/index.d.ts', 'Types entry should be dist/index.d.ts');
