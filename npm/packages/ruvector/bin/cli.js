@@ -3160,7 +3160,14 @@ class Intelligence {
       yaml: ['devops-engineer', 'coder']
     };
     const agents = agentMap[fileType] ?? ['coder', 'reviewer'];
-    const { action, confidence } = this.suggest(state, agents);
+    let { action, confidence } = this.suggest(state, agents);
+    // Q-table learns by outcome (`${state}|successful-edit` / `|success`), not by agent name,
+    // so the per-agent suggest above never matches. Fall back to the learned state-success
+    // signal and surface it as confidence, keeping the static agent ranking (no per-agent data).
+    if (confidence === 0) {
+      const succ = this.getQ(state, 'successful-edit') || this.getQ(state, 'success');
+      if (succ > 0) { action = agents[0]; confidence = succ; }
+    }
     const reason = confidence > 0.5 ? 'learned from past success' : confidence > 0 ? 'based on patterns' : `default for ${fileType} files`;
 
     // Begin trajectory in engine (only if already initialized)
