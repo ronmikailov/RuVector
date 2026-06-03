@@ -291,27 +291,8 @@ class Intelligence {
   }
 
   async route(task, file = null) {
-    // Use engine if available (SONA-enhanced routing)
-    if (this.engine) {
-      try {
-        const result = await this.engine.route(task, file);
-        return {
-          agent: result.agent,
-          confidence: result.confidence,
-          reason: result.reason,
-          alternates: result.alternates,
-          sonaPatterns: result.patterns?.length || 0,
-          engineRouted: true
-        };
-      } catch {}
-    }
-
-    // Fallback (engine unavailable). The store is flat: patterns["<state>|<outcome>"] = {q_value}.
-    // The learner writes outcome-keyed entries (`successful-edit` / `success`), so read those
-    // directly rather than the old nested patterns[state] map (which never existed).
-    const ext = file ? path.extname(file).slice(1) : 'unknown';
-    const state = `edit_${ext}_in_project`;
-
+    // Agent-by-extension defaults. The flat store is outcome-keyed and carries no agent name,
+    // so the agent is derived from the file extension (same mapping bin/cli.js route() uses).
     const defaults = {
       rs: 'rust-developer',
       ts: 'typescript-developer',
@@ -323,15 +304,53 @@ class Intelligence {
       sql: 'database-specialist',
       md: 'documentation-specialist'
     };
+    const ext = file ? path.extname(file).slice(1) : 'unknown';
 
-    const bestAgent = defaults[ext] || 'coder';
-    const succ = this.data.patterns?.[`${state}|successful-edit`]?.q_value
-              ?? this.data.patterns?.[`${state}|success`]?.q_value ?? 0;
+    // Learned signal from the flat store: patterns["edit_<ext>_in_project|<outcome>"].q_value.
+    // The learner writes outcome-keyed entries (`successful-edit` / `success`) — this is the same
+    // signal the (working) CLI route reads, and the only place real learned routing lives.
+    const state = `edit_${ext}_in_project`;
+    const succ = this.data?.patterns?.[`${state}|successful-edit`]?.q_value
+              ?? this.data?.patterns?.[`${state}|success`]?.q_value ?? 0;
+    const learned = succ > 0
+      ? { agent: defaults[ext] || 'coder', confidence: Math.min(succ, 1.0) }
+      : null;
 
+    // Use engine if available (SONA-enhanced routing).
+    if (this.engine) {
+      try {
+        const result = await this.engine.route(task, file);
+        const engineConf = result.confidence ?? 0;
+        // The engine's routingPatterns table is keyed by a separate state schema (`edit:.ts`) that
+        // the learner never populates (it writes `edit_ts_in_project|successful-edit`), so the
+        // engine base-routes to "default mapping"/0.5. Prefer the stronger learned flat-store
+        // signal when present, while preserving the engine/SONA metadata.
+        if (learned && learned.confidence > engineConf) {
+          return {
+            agent: learned.agent,
+            confidence: learned.confidence,
+            reason: 'learned from past success',
+            alternates: result.alternates || [],
+            sonaPatterns: result.patterns?.length || 0,
+            engineRouted: true
+          };
+        }
+        return {
+          agent: result.agent,
+          confidence: engineConf,
+          reason: result.reason,
+          alternates: result.alternates,
+          sonaPatterns: result.patterns?.length || 0,
+          engineRouted: true
+        };
+      } catch {}
+    }
+
+    // Fallback (engine unavailable).
     return {
-      agent: bestAgent,
-      confidence: succ > 0 ? Math.min(succ, 1.0) : 0.5,
-      reason: succ > 0 ? 'learned from past success' : 'default mapping'
+      agent: learned ? learned.agent : (defaults[ext] || 'coder'),
+      confidence: learned ? learned.confidence : 0.5,
+      reason: learned ? 'learned from past success' : 'default mapping'
     };
   }
 
