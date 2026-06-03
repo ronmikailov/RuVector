@@ -581,6 +581,25 @@ export class IntelligenceEngine {
       }
     }
 
+    // Also consult the outcome-keyed legacy store. The learner persists file-edit signal
+    // under `edit_<ext>_in_project` with an outcome sub-key (`successful-edit` / `success`),
+    // not the `taskType:.ext` schema getState() produces above, so the statePatterns lookup
+    // above never matches it (issue #2). Recover the learned Q-value here and map the file
+    // extension -> agent via the same `defaults` table (the store carries no agent identity).
+    const legacyState = `edit_${ext.replace(/^\./, '')}_in_project`;
+    const legacyPatterns = this.routingPatterns.get(legacyState);
+    if (legacyPatterns) {
+      const learnedSucc = Math.max(
+        legacyPatterns.get('successful-edit') ?? 0,
+        legacyPatterns.get('success') ?? 0,
+      );
+      if (learnedSucc > bestScore) {
+        bestAgent = defaults[ext] || 'coder';
+        bestScore = Math.min(learnedSucc, 1.0);
+        reason = 'learned from past success';
+      }
+    }
+
     // Check custom agent mappings
     if (this.agentMappings.has(ext)) {
       const mapped = this.agentMappings.get(ext)!;
