@@ -3316,7 +3316,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // ── Brain Tool Handlers ─────────────────────────────────────────────
       case 'brain_search': {
         try {
-          const piBrain = require('@ruvector/pi-brain');
+          const piBrain = await import('@ruvector/pi-brain');
           const PiBrainClient = piBrain.PiBrainClient || piBrain.default;
           const url = process.env.BRAIN_URL || 'https://pi.ruv.io';
           const key = process.env.PI || '';
@@ -3333,7 +3333,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'brain_share': {
         try {
-          const piBrain = require('@ruvector/pi-brain');
+          const piBrain = await import('@ruvector/pi-brain');
           const PiBrainClient = piBrain.PiBrainClient || piBrain.default;
           const url = process.env.BRAIN_URL || 'https://pi.ruv.io';
           const key = process.env.PI || '';
@@ -3350,7 +3350,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'brain_get': {
         try {
-          const piBrain = require('@ruvector/pi-brain');
+          const piBrain = await import('@ruvector/pi-brain');
           const PiBrainClient = piBrain.PiBrainClient || piBrain.default;
           const url = process.env.BRAIN_URL || 'https://pi.ruv.io';
           const key = process.env.PI || '';
@@ -3367,7 +3367,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'brain_vote': {
         try {
-          const piBrain = require('@ruvector/pi-brain');
+          const piBrain = await import('@ruvector/pi-brain');
           const PiBrainClient = piBrain.PiBrainClient || piBrain.default;
           const url = process.env.BRAIN_URL || 'https://pi.ruv.io';
           const key = process.env.PI || '';
@@ -3384,7 +3384,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'brain_list': {
         try {
-          const piBrain = require('@ruvector/pi-brain');
+          const piBrain = await import('@ruvector/pi-brain');
           const PiBrainClient = piBrain.PiBrainClient || piBrain.default;
           const url = process.env.BRAIN_URL || 'https://pi.ruv.io';
           const key = process.env.PI || '';
@@ -3401,7 +3401,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'brain_delete': {
         try {
-          const piBrain = require('@ruvector/pi-brain');
+          const piBrain = await import('@ruvector/pi-brain');
           const PiBrainClient = piBrain.PiBrainClient || piBrain.default;
           const url = process.env.BRAIN_URL || 'https://pi.ruv.io';
           const key = process.env.PI || '';
@@ -3418,7 +3418,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'brain_status': {
         try {
-          const piBrain = require('@ruvector/pi-brain');
+          const piBrain = await import('@ruvector/pi-brain');
           const PiBrainClient = piBrain.PiBrainClient || piBrain.default;
           const url = process.env.BRAIN_URL || 'https://pi.ruv.io';
           const key = process.env.PI || '';
@@ -3435,7 +3435,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'brain_drift': {
         try {
-          const piBrain = require('@ruvector/pi-brain');
+          const piBrain = await import('@ruvector/pi-brain');
           const PiBrainClient = piBrain.PiBrainClient || piBrain.default;
           const url = process.env.BRAIN_URL || 'https://pi.ruv.io';
           const key = process.env.PI || '';
@@ -3452,7 +3452,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'brain_partition': {
         try {
-          const piBrain = require('@ruvector/pi-brain');
+          const piBrain = await import('@ruvector/pi-brain');
           const PiBrainClient = piBrain.PiBrainClient || piBrain.default;
           const url = process.env.BRAIN_URL || 'https://pi.ruv.io';
           const key = process.env.PI || '';
@@ -3469,7 +3469,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'brain_transfer': {
         try {
-          const piBrain = require('@ruvector/pi-brain');
+          const piBrain = await import('@ruvector/pi-brain');
           const PiBrainClient = piBrain.PiBrainClient || piBrain.default;
           const url = process.env.BRAIN_URL || 'https://pi.ruv.io';
           const key = process.env.PI || '';
@@ -3486,7 +3486,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'brain_sync': {
         try {
-          const piBrain = require('@ruvector/pi-brain');
+          const piBrain = await import('@ruvector/pi-brain');
           const PiBrainClient = piBrain.PiBrainClient || piBrain.default;
           const url = process.env.BRAIN_URL || 'https://pi.ruv.io';
           const key = process.env.PI || '';
